@@ -1,0 +1,45 @@
+name: Build and Deploy to IIS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Packages
+        run: dotnet restore
+
+      - name: Build Application
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish Application
+        run: dotnet publish --configuration Release --output publish
+
+      - name: Stop IIS App Pool
+        shell: powershell
+        run: |
+          Import-Module WebAdministration
+          Stop-WebAppPool -Name "DummyAppPool"
+
+      - name: Deploy to IIS
+        shell: powershell
+        run: |
+          Copy-Item ".\publish\*" "C:\inetpub\wwwroot\DummyApp" -Recurse -Force
+
+      - name: Start IIS App Pool
+        shell: powershell
+        run: |
+          Import-Module WebAdministration
+          Start-WebAppPool -Name "DummyAppPool"

@@ -34,17 +34,19 @@ jobs:
         shell: cmd
         run: dotnet publish --configuration Release --output publish
 
-      - name: Take Application Offline
+      - name: Put Application Offline
         shell: powershell
         run: |
           $offline = "C:\inetpub\wwwroot\DummyApp\app_offline.htm"
-          "Application is being updated. Please try again in a few moments." | Out-File -FilePath $offline -Encoding utf8 -Force
-          Start-Sleep -Seconds 5
+          "Deployment in progress..." | Out-File $offline -Encoding utf8 -Force
+          Start-Sleep -Seconds 3
 
       - name: Deploy Files
-        shell: powershell
+        shell: cmd
         run: |
-          Copy-Item ".\publish\*" "C:\inetpub\wwwroot\DummyApp" -Recurse -Force
+          robocopy publish C:\inetpub\wwwroot\DummyApp /E /R:2 /W:2
+          if %ERRORLEVEL% LEQ 3 exit /b 0
+          exit /b %ERRORLEVEL%
 
       - name: Bring Application Online
         if: always()
@@ -55,7 +57,16 @@ jobs:
               Remove-Item $offline -Force
           }
 
-      - name: Verify Deployment
+      - name: Start Application Pool
+        if: always()
         shell: powershell
         run: |
-          Get-ChildItem "C:\inetpub\wwwroot\DummyApp"
+          Import-Module WebAdministration
+          Start-WebAppPool -Name "DummyAppPool"
+
+      - name: Verify IIS
+        shell: powershell
+        run: |
+          Import-Module WebAdministration
+          Get-WebAppPoolState -Name "DummyAppPool"
+          Get-Website

@@ -1,0 +1,7 @@
+C:\Projects\DummyApp\publish\DummyApp.exe
+C:\Projects\DummyApp\publish\appsettings.Development.json
+C:\Projects\DummyApp\publish\appsettings.json
+C:\Projects\DummyApp\publish\DummyApp.dll
+C:\Projects\DummyApp\publish\DummyApp.deps.json
+C:\Projects\DummyApp\publish\DummyApp.runtimeconfig.json
+C:\Projects\DummyApp\publish\DummyApp.pdb

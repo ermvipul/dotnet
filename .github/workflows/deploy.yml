@@ -7,24 +7,25 @@ on:
 
 jobs:
   build-deploy:
-    runs-on: self-hosted
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+      - name: Verify .NET SDK
+        run: dotnet --info
 
-      - name: Restore Packages
+      - name: Restore
         run: dotnet restore
 
-      - name: Build Application
+      - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Publish Application
+      - name: Publish
         run: dotnet publish --configuration Release --output publish
 
       - name: Stop IIS App Pool
@@ -33,7 +34,7 @@ jobs:
           Import-Module WebAdministration
           Stop-WebAppPool -Name "DummyAppPool"
 
-      - name: Deploy to IIS
+      - name: Deploy
         shell: powershell
         run: |
           Copy-Item ".\publish\*" "C:\inetpub\wwwroot\DummyApp" -Recurse -Force
